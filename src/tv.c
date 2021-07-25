@@ -36,7 +36,6 @@
 #include "data.h"
 #include "constants/battle_frontier.h"
 #include "constants/contest.h"
-#include "constants/event_objects.h"
 #include "constants/items.h"
 #include "constants/layouts.h"
 #include "constants/lilycove_lady.h"
@@ -336,19 +335,19 @@ static const u8 *const sTVPokemonTodaySuccessfulTextGroup[] = {
 };
 
 static const u8 *const sTVTodaysSmartShopperTextGroup[] = {
-    [SMARTSHOPPER_STATE_INTRO]          = SmartShopper_Text_Intro,
-    [SMARTSHOPPER_STATE_CLERK_NORMAL]   = SmartShopper_Text_ClerkNormal,
-    [SMARTSHOPPER_STATE_RAND_COMMENT_1] = SmartShopper_Text_RandomComment1,
-    [SMARTSHOPPER_STATE_RAND_COMMENT_2] = SmartShopper_Text_RandomComment2,
-    [SMARTSHOPPER_STATE_RAND_COMMENT_3] = SmartShopper_Text_RandomComment3,
-    [SMARTSHOPPER_STATE_RAND_COMMENT_4] = SmartShopper_Text_RandomComment4,
-    [SMARTSHOPPER_STATE_SECOND_ITEM]    = SmartShopper_Text_SecondItem,
-    [SMARTSHOPPER_STATE_THIRD_ITEM]     = SmartShopper_Text_ThirdItem,
-    [SMARTSHOPPER_STATE_DURING_SALE]    = SmartShopper_Text_DuringSale,
-    [SMARTSHOPPER_STATE_OUTRO_NORMAL]   = SmartShopper_Text_OutroNormal,
-    [SMARTSHOPPER_STATE_IS_VIP]         = SmartShopper_Text_IsVIP,
-    [SMARTSHOPPER_STATE_CLERK_MAX]      = SmartShopper_Text_ClerkMax,
-    [SMARTSHOPPER_STATE_OUTRO_MAX]      = SmartShopper_Text_OutroMax
+    gTVTodaysSmartShopperText00,
+    gTVTodaysSmartShopperText01,
+    gTVTodaysSmartShopperText02,
+    gTVTodaysSmartShopperText03,
+    gTVTodaysSmartShopperText04,
+    gTVTodaysSmartShopperText05,
+    gTVTodaysSmartShopperText06,
+    gTVTodaysSmartShopperText07,
+    gTVTodaysSmartShopperText08,
+    gTVTodaysSmartShopperText09,
+    gTVTodaysSmartShopperText10,
+    gTVTodaysSmartShopperText11,
+    gTVTodaysSmartShopperText12
 };
 
 static const u8 *const sTVBravoTrainerTextGroup[] = {
@@ -2786,7 +2785,7 @@ size_t CountDigits(int value)
     return 1;
 }
 
-static void SmartShopper_BufferPurchaseTotal(u8 varIdx, TVShow *show)
+static void sub_80EF40C(u8 varIdx, TVShow *show)
 {
     u8 i;
     int price;
@@ -3422,7 +3421,7 @@ void GetMomOrDadStringForTVMessage(void)
 void HideBattleTowerReporter(void)
 {
     VarSet(VAR_BRAVO_TRAINER_BATTLE_TOWER_ON, 0);
-    RemoveObjectEventByLocalIdAndMap(LOCALID_BATTLE_TOWER_LOBBY_REPORTER, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    RemoveObjectEventByLocalIdAndMap(5, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
     FlagSet(FLAG_HIDE_BATTLE_TOWER_REPORTER);
 }
 
@@ -4461,85 +4460,78 @@ static void DoTVShowTodaysSmartShopper(void)
     state = sTVShowState;
     switch(state)
     {
-    case SMARTSHOPPER_STATE_INTRO:
+    case 0:
         TVShowConvertInternationalString(gStringVar1, show->smartshopperShow.playerName, show->smartshopperShow.language);
         GetMapName(gStringVar2, show->smartshopperShow.shopLocation, 0);
         if (show->smartshopperShow.itemAmounts[0] >= 255)
-            sTVShowState = SMARTSHOPPER_STATE_CLERK_MAX;
+            sTVShowState = 11;
         else
-            sTVShowState = SMARTSHOPPER_STATE_CLERK_NORMAL;
+            sTVShowState = 1;
         break;
-    case SMARTSHOPPER_STATE_CLERK_NORMAL:
+    case 1:
         TVShowConvertInternationalString(gStringVar1, show->smartshopperShow.playerName, show->smartshopperShow.language);
         StringCopy(gStringVar2, ItemId_GetName(show->smartshopperShow.itemIds[0]));
         ConvertIntToDecimalString(2, show->smartshopperShow.itemAmounts[0]);
-        // Pick a random comment (SMARTSHOPPER_STATE_RAND_COMMENT_#)
-        sTVShowState += SMARTSHOPPER_STATE_CLERK_NORMAL + (Random() % (SMARTSHOPPER_STATE_RAND_COMMENT_4 - SMARTSHOPPER_STATE_RAND_COMMENT_1 + 1));
+        sTVShowState += 1 + (Random() % 4);
         break;
-    case SMARTSHOPPER_STATE_RAND_COMMENT_1:
-    case SMARTSHOPPER_STATE_RAND_COMMENT_3:
-    case SMARTSHOPPER_STATE_RAND_COMMENT_4:
+    case 2:
+    case 4:
+    case 5:
         if (show->smartshopperShow.itemIds[1] != ITEM_NONE)
-            sTVShowState = SMARTSHOPPER_STATE_SECOND_ITEM;
+            sTVShowState = 6;
         else
-            sTVShowState = SMARTSHOPPER_STATE_IS_VIP;
+            sTVShowState = 10;
         break;
-    case SMARTSHOPPER_STATE_RAND_COMMENT_2:
+    case 3:
         ConvertIntToDecimalString(2, show->smartshopperShow.itemAmounts[0] + 1);
         if (show->smartshopperShow.itemIds[1] != ITEM_NONE)
-            sTVShowState = SMARTSHOPPER_STATE_SECOND_ITEM;
+            sTVShowState = 6;
         else
-            sTVShowState = SMARTSHOPPER_STATE_IS_VIP;
+            sTVShowState = 10;
         break;
-    case SMARTSHOPPER_STATE_SECOND_ITEM:
-        // Clerk describes 2nd type of item player purchased
+    case 6:
         StringCopy(gStringVar2, ItemId_GetName(show->smartshopperShow.itemIds[1]));
         ConvertIntToDecimalString(2, show->smartshopperShow.itemAmounts[1]);
         if (show->smartshopperShow.itemIds[2] != ITEM_NONE)
-            sTVShowState = SMARTSHOPPER_STATE_THIRD_ITEM;
+            sTVShowState = 7;
         else if (show->smartshopperShow.priceReduced == TRUE)
-            sTVShowState = SMARTSHOPPER_STATE_DURING_SALE;
+            sTVShowState = 8;
         else
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_NORMAL;
+            sTVShowState = 9;
         break;
-    case SMARTSHOPPER_STATE_THIRD_ITEM:
-        // Clerk describes 3rd type of item player purchased
+    case 7:
         StringCopy(gStringVar2, ItemId_GetName(show->smartshopperShow.itemIds[2]));
         ConvertIntToDecimalString(2, show->smartshopperShow.itemAmounts[2]);
         if (show->smartshopperShow.priceReduced == TRUE)
-            sTVShowState = SMARTSHOPPER_STATE_DURING_SALE;
+            sTVShowState = 8;
         else
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_NORMAL;
+            sTVShowState = 9;
         break;
-    case SMARTSHOPPER_STATE_DURING_SALE:
+    case 8:
         if (show->smartshopperShow.itemAmounts[0] >= 255)
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_MAX;
+            sTVShowState = 12;
         else
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_NORMAL;
+            sTVShowState = 9;
         break;
-    case SMARTSHOPPER_STATE_OUTRO_NORMAL:
-        SmartShopper_BufferPurchaseTotal(1, show);
+    case 9:
+        sub_80EF40C(1, show);
         TVShowDone();
         break;
-    case SMARTSHOPPER_STATE_IS_VIP:
-        // Clerk says customer is a VIP
-        // Said if player only purchased one type of item
+    case 10:
         if (show->smartshopperShow.priceReduced == TRUE)
-            sTVShowState = SMARTSHOPPER_STATE_DURING_SALE;
+            sTVShowState = 8;
         else
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_NORMAL;
+            sTVShowState = 9;
         break;
-    case SMARTSHOPPER_STATE_CLERK_MAX:
-        // Clerk's comments if player purchased maximum number of 1st item
+    case 11:
         TVShowConvertInternationalString(gStringVar1, show->smartshopperShow.playerName, show->smartshopperShow.language);
         StringCopy(gStringVar2, ItemId_GetName(show->smartshopperShow.itemIds[0]));
         if (show->smartshopperShow.priceReduced == TRUE)
-            sTVShowState = SMARTSHOPPER_STATE_DURING_SALE;
+            sTVShowState = 8;
         else
-            sTVShowState = SMARTSHOPPER_STATE_OUTRO_MAX;
+            sTVShowState = 12;
         break;
-    case SMARTSHOPPER_STATE_OUTRO_MAX:
-        // Outro comments if player purchased maximum number of 1st item
+    case 12:
         TVShowConvertInternationalString(gStringVar1, show->smartshopperShow.playerName, show->smartshopperShow.language);
         TVShowDone();
         break;

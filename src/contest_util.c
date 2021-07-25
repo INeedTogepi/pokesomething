@@ -497,7 +497,7 @@ static void LoadContestMonName(u8 monIndex)
     struct ContestPokemon *mon = &gContestMons[monIndex];
     u8 *str = gDisplayedStringBattle;
     if (monIndex == gContestPlayerMonIndex)
-        str = StringCopy(gDisplayedStringBattle, gText_ColorDarkGray);
+        str = StringCopy(gDisplayedStringBattle, gText_ColorDarkGrey);
 
     StringCopy(str, mon->nickname);
     AddContestTextPrinter(monIndex, gDisplayedStringBattle, 0);

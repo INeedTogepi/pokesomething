@@ -327,9 +327,7 @@ static u32 LoopedTask_OpenRegionMap(s32 taskState)
         }
         else
         {
-            // Dim the region map when zoom is disabled
-            // (when the player is off the map)
-            BlendRegionMap(RGB_BLACK, 6);
+            sub_8123030(RGB_BLACK, 6);
         }
         return LT_INC_AND_PAUSE;
     case 2:
